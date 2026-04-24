@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>نظام مدينون لخدمات خارجية الميناء 2026</title>
+  <meta name="theme-color" content="#7b0f16" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js');
+      });
+    }
+  </script>
+</head>
+<body>
+  <!-- Passcode Overlay -->
+  <div id="passcodeOverlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-color, #f4f6f9); z-index:99999; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+    <div style="background:var(--surface-color, #fff); padding:30px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.1); text-align:center;">
+      <h2 style="margin-top:0; color:var(--primary-color, #7b0f16);">النظام محمي بكلمة مرور</h2>
+      <p style="color:var(--text-color, #333); margin-bottom:20px;">الرجاء إدخال رمز الدخول للمتابعة</p>
+      <input type="password" id="passcodeInput" style="width:100%; padding:10px; text-align:center; font-size:1.5rem; letter-spacing:5px; border:1px solid #ccc; border-radius:6px; margin-bottom:15px;" placeholder="****">
+      <button id="passcodeBtn" style="background:var(--primary-color, #7b0f16); color:#fff; border:none; padding:10px 20px; width:100%; border-radius:6px; font-size:1.1rem; cursor:pointer;">دخول</button>
+      <p id="passcodeError" style="color:red; display:none; margin-top:10px;">الرمز خاطئ</p>
+    </div>
+  </div>
+
+  <!-- PWA Install Prompt -->
+  <div id="installPrompt" style="position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:var(--surface-color, #fff); padding:15px; border-radius:12px; box-shadow:0 5px 20px rgba(0,0,0,0.2); z-index:9999; display:none; width:90%; max-width:400px; text-align:center;">
+    <h3 style="margin:0 0 10px 0; color:var(--text-color, #000);">حمل التطبيق</h3>
+    <p style="margin:0 0 15px 0; font-size:0.9rem; color:var(--text-color, #555);">أضف الموقع كتطبيق على شاشتك الرئيسية (أضف صورة بأسم icon-192x192.png و icon-512x512.png)</p>
+    <div style="display:flex; gap:10px;">
+      <button id="installAppBtn" style="flex:1; background:var(--primary-color, #7b0f16); color:#fff; border:none; padding:8px; border-radius:6px; cursor:pointer;">تثبيت</button>
+      <button id="closeInstallPromptBtn" style="flex:1; background:#ccc; color:#000; border:none; padding:8px; border-radius:6px; cursor:pointer;">تخطي</button>
+    </div>
+  </div>
+
+  <div class="bg-orb orb-1"></div><div class="bg-orb orb-2"></div><div class="bg-orb orb-3"></div>
+  <header class="topbar glass">
+    <div><p class="eyebrow">تطبيق ويب ديناميكي مطابق لفكرة الإكسل</p><h1>نظام مدينون لخدمات خارجية الميناء 2026</h1></div>
+    <div class="topbar-actions"><button class="icon-btn" id="themeToggle" title="تبديل المظهر"><i class="fa-solid fa-moon"></i></button><button class="icon-btn" id="seedResetBtn" title="إعادة البيانات الأصلية"><i class="fa-solid fa-rotate-left"></i></button></div>
+  </header>
+  <main class="app-shell">
+    <section class="view active" id="view-dashboard">
+      <div class="section-header"><div><h2>الرئيسية</h2><p>ملخص مباشر للنظام بالكامل مع آخر الحركات</p></div><div class="quick-actions"><button class="primary-btn" data-go="view-operations"><i class="fa-solid fa-plus"></i> إضافة حركة</button><button class="soft-btn" data-go="view-reports"><i class="fa-solid fa-chart-column"></i> فتح التقارير</button></div></div>
+      <div class="stats-grid">
+        <article class="stat-card glass"><span>مجموع المبالغ</span><strong id="statDebt">0</strong><small>مجموع مبالغ التخليص والخدمات</small></article>
+        <article class="stat-card glass"><span>مجموع الديون</span><strong id="statRemaining">0</strong><small>المبالغ المتبقية بعد طرح المقبوضات</small></article>
+        <article class="stat-card glass"><span>مجموع المقبوضات</span><strong id="statPayments">0</strong><small>كل الدفعات المستلمة</small></article>
+        <article class="stat-card glass"><span>مجموع الأرباح</span><strong id="statProfit">0</strong><small>750,000 د.ع لكل حاوية مع إمكانية التعديل اليدوي</small></article>
+        <article class="stat-card glass"><span>مجموع الضرائب</span><strong id="statTax">0</strong><small>15% من الأرباح</small></article>
+        <article class="stat-card glass"><span>صافي الأرباح</span><strong id="statProfitRemaining">0</strong><small>الأرباح بعد خصم الضرائب</small></article>
+      </div>
+      <div class="dashboard-grid"><section class="glass panel"><div class="panel-head"><h3>آخر الحركات</h3><button class="soft-btn" data-go="view-ledger">فتح كشف الحساب</button></div><div id="recentOperations" class="table-wrap"></div></section><section class="glass panel"><div class="panel-head"><h3>ملخص الشركات</h3></div><div id="dashboardCompanies" class="mini-company-list"></div></section></div>
+    </section>
+    <section class="view" id="view-companies">
+      <div class="section-header"><div><h2>الشركات / العملاء</h2><p>مطابق لفكرة قائمة الأشخاص مع كود لكل شركة</p></div></div>
+      <div class="content-grid two-col">
+        <section class="glass panel">
+          <div class="panel-head"><h3>إضافة / تعديل شركة</h3></div>
+          <form id="companyForm" class="form-grid">
+            <input type="hidden" id="companyEditId" />
+            <label><span>اسم الشركة</span><input type="text" id="companyName" placeholder="اكتب اسم الشركة" required /></label>
+            <label><span>الكود</span><input type="text" id="companyCode" placeholder="مثال: DHC-9" required /></label>
+            <div class="form-actions"><button type="submit" class="primary-btn"><i class="fa-solid fa-floppy-disk"></i> حفظ الشركة</button><button type="button" class="soft-btn" id="companyFormReset"><i class="fa-solid fa-eraser"></i> تفريغ</button></div>
+          </form>
+        </section>
+        <section class="glass panel">
+          <div class="panel-head"><h3>قائمة الشركات</h3><input type="search" id="companySearch" class="search-input" placeholder="بحث باسم الشركة أو الكود" /></div>
+          <div id="companiesTable" class="table-wrap"></div>
+        </section>
+      </div>
+      <div class="content-grid" id="companyDetailsContainer" style="display:none; margin-top:16px;">
+        <section class="glass panel">
+            <div class="panel-head">
+                <h3 id="detailCompanyName"></h3>
+                <div class="quick-actions">
+                    <div class="panel-tabs">
+                      <button class="primary-btn" id="tabClearanceBtn">التخليص</button>
+                      <button class="soft-btn" id="tabPaymentsBtn">الدفعات</button>
+                    </div>
+                    <button class="icon-btn" id="closeCompanyDetailsBtn" title="إغلاق"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+            <div id="clearanceDetailsView" class="table-wrap" style="margin-top:16px;"></div>
+            <div id="paymentsDetailsView" class="table-wrap" style="display:none; margin-top:16px;"></div>
+        </section>
+      </div>
+    </section>
+    <section class="view" id="view-operations"><div class="section-header"><div><h2>العمليات</h2><p>إضافة حركة جديدة مع إظهار الحقول حسب نوع العملية تماماً مثل منطق الإكسل</p></div></div><div class="content-grid"><section class="glass panel"><div class="panel-head"><h3>نموذج العملية</h3></div><form id="operationForm" class="form-grid wide"><input type="hidden" id="operationEditId" /><label><span>اسم العميل</span><select id="clientName" required></select></label><label><span>كود العميل</span><input type="text" id="clientCode" readonly /></label><label><span>نوع العملية</span><select id="operationType" required><option value="تخليص">تخليص</option><option value="دفعة نقدية">دفعة نقدية</option></select></label><label><span>رقم البوليصة</span><input type="text" id="billNo" /></label><div class="dynamic-group" id="clearanceFields"><label><span>حجم الحاوية</span><select id="containerSize"><option value="">اختر</option><option value="20 قدم">20 قدم</option><option value="40 قدم">40 قدم</option><option value="45 قدم">45 قدم</option></select></label><label><span>عدد الحاويات</span><input type="number" min="0" step="1" id="containerCount" /></label><label><span>قيمة تخليص الحاوية</span><input type="number" min="0" step="0.01" id="clearancePerContainer" /></label><label><span>قيمة التخليص</span><input type="number" min="0" step="0.01" id="clearanceValue" readonly /></label><label><span>تاريخ الوصول</span><input type="date" id="arrivalDate" /></label><label><span>تاريخ الاستلام</span><input type="date" id="receiptDate" /></label><label><span>تاريخ الخروج</span><input type="date" id="exitDate" /></label><label><span>المستلم</span><input type="text" id="receiver" /></label><label><span>الأرباح</span><input type="number" min="0" step="0.01" id="profit" placeholder="تُحتسب تلقائياً: 750,000 لكل حاوية ويمكن تعديلها يدوياً" /></label><label><span>الضرائب</span><input type="number" min="0" step="0.01" id="tax" readonly /></label><label><span>عوائد وأجور إضافية</span><input type="number" min="0" step="0.01" id="extraReturns" /></label><label><span>أجور ساحة إضافية</span><input type="number" min="0" step="0.01" id="extraYardFees" /></label><label><span>غرامات شحن</span><input type="number" min="0" step="0.01" id="extraTruckFees" /></label><label><span>مجموع المبلغ</span><input type="number" min="0" step="0.01" id="totalAmount" readonly /></label></div><div class="dynamic-group compact" id="paymentFields"><label><span>الواصل</span><input type="number" min="0" step="0.01" id="receivedAmount" /></label><label><span>تاريخ الدفعة المالية</span><input type="date" id="paymentDate" /></label></div><label class="full-span"><span>التفاصيل</span><textarea id="details" rows="3" placeholder="تفاصيل إضافية"></textarea></label><div class="form-actions full-span"><button type="submit" class="primary-btn"><i class="fa-solid fa-floppy-disk"></i> حفظ العملية</button><button type="button" class="soft-btn" id="resetOperationForm"><i class="fa-solid fa-broom"></i> تفريغ النموذج</button></div></form></section><section class="glass panel"><div class="panel-head"><h3>سجل العمليات</h3><div class="filters-inline"><input type="search" id="operationSearch" class="search-input" placeholder="بحث باسم الشركة أو البوليصة أو التفاصيل" /><select id="operationFilterType" class="search-input small"><option value="all">كل العمليات</option><option value="تخليص">تخليص</option><option value="دفعة نقدية">دفعة نقدية</option></select></div></div><div id="operationsTable" class="table-wrap"></div></section></div></section>
+    <section class="view" id="view-ledger"><div class="section-header"><div><h2>كشف الحساب</h2><p>عرض كشف حساب مفصل لكل شركة مع المجاميع العليا مثل الإكسل</p></div></div><section class="glass panel"><div class="panel-head ledger-head"><div class="filters-inline"><select id="ledgerCompanySelect" class="search-input"></select><button class="primary-btn" id="ledgerRefresh"><i class="fa-solid fa-rotate"></i> تحديث الكشف</button></div><div class="filters-inline"><button class="soft-btn" id="printLedgerBtn"><i class="fa-solid fa-print"></i> طباعة الكشف</button><button class="soft-btn" id="pdfLedgerBtn"><i class="fa-solid fa-file-pdf"></i> PDF</button></div></div><div id="ledgerSummary" class="stats-grid compact"></div><div id="ledgerTable" class="table-wrap"></div></section></section>
+    <section class="view" id="view-reports"><div class="section-header"><div><h2>التقارير</h2><p>تقارير لكل شركة مع فلترة بالتاريخ والنوع</p></div></div><section class="glass panel"><div class="panel-head report-head"><div class="filters-inline wrap"><select id="reportCompanySelect" class="search-input"></select><select id="reportTypeSelect" class="search-input small"><option value="all">الكل</option><option value="تخليص">تخليص</option><option value="دفعة نقدية">دفعة نقدية</option></select><input type="date" id="reportFromDate" class="search-input small" /><input type="date" id="reportToDate" class="search-input small" /><button class="primary-btn" id="applyReportFilter"><i class="fa-solid fa-filter"></i> تطبيق</button></div><div class="filters-inline"><button class="primary-btn" id="invoiceReportBtn" style="display:none; background: linear-gradient(180deg, #dbb00f, #a68500);"><i class="fa-solid fa-file-invoice-dollar"></i> فاتورة حساب</button><button class="primary-btn" id="manualInvoiceBtn" style="display:none; background: linear-gradient(180deg, #10b981, #059669);"><i class="fa-solid fa-file-pen"></i> فاتورة يدوية</button><button class="soft-btn" id="printReportBtn"><i class="fa-solid fa-print"></i> طباعة التقرير</button><button class="soft-btn" id="pdfReportBtn"><i class="fa-solid fa-file-pdf"></i> PDF</button></div></div><div id="reportSummary" class="stats-grid compact"></div><div id="reportTable" class="table-wrap"></div></section></section>
+    <section class="view" id="view-print"><div class="section-header"><div><h2>الطباعة و PDF</h2><p>أوامر سريعة للطباعة والتصدير لكل شركة أو لكل النظام</p></div></div><div class="print-actions-grid"><button class="glass action-card" id="printAllOperationsBtn"><i class="fa-solid fa-print"></i><span>طباعة كل العمليات</span></button><button class="glass action-card" id="pdfAllOperationsBtn"><i class="fa-solid fa-file-pdf"></i><span>PDF لكل العمليات</span></button><button class="glass action-card" id="printCompanyStatementBtn"><i class="fa-solid fa-building"></i><span>طباعة كشف الشركة المحددة</span></button><button class="glass action-card" id="pdfCompanyStatementBtn"><i class="fa-solid fa-file-lines"></i><span>PDF كشف الشركة المحددة</span></button></div><section class="glass panel"><div class="panel-head"><h3>اختيار الشركة للطباعة السريعة</h3><select id="quickPrintCompanySelect" class="search-input"></select></div><div class="notice-box">عند إنشاء ملف PDF سيتم تصدير الجدول الحالي داخل التطبيق مع المجاميع، أما الطباعة فتستخدم تنسيقاً نظيفاً جاهزاً للحفظ كـ PDF من المتصفح أيضاً.</div></section></section>
+    <section class="view" id="view-settings"><div class="section-header"><div><h2>الإعدادات</h2><p>نسخ احتياطي واسترجاع وتهيئة النظام</p></div></div><div class="content-grid two-col"><section class="glass panel"><div class="panel-head"><h3>النسخ الاحتياطي</h3></div><div class="stack-buttons"><button class="primary-btn" id="exportJsonBtn"><i class="fa-solid fa-download"></i> تصدير نسخة JSON</button><label class="upload-btn"><i class="fa-solid fa-upload"></i><span>استيراد نسخة JSON</span><input type="file" id="importJsonInput" accept=".json" hidden /></label></div></section><section class="glass panel"><div class="panel-head"><h3>البيانات الأساسية</h3></div><div class="notice-box">التطبيق يبدأ بالـ 28 سجل الحقيقية المستخرجة من الإكسل، وبعدها يتحول إلى نظام ديناميكي بإضافة وتعديل وحذف بدون صفوف وهمية.</div></section></div></section>
+<section class="view" id="view-invoice">
+  <div class="section-header">
+    <div>
+      <h2>فاتورة حساب</h2>
+    </div>
+    <div class="quick-actions">
+      <button class="primary-btn" id="printInvoiceBtn" style="background:#a61424;"><i class="fa-solid fa-print"></i> طباعة في ورقة واحدة</button>
+      <button class="soft-btn" id="pdfInvoiceBtn"><i class="fa-solid fa-file-pdf"></i> تحميل PDF</button>
+      <button class="icon-btn" onclick="document.querySelector('.nav-btn[data-target=\'view-reports\']').click()"><i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+  </div>
+  <section class="glass panel" id="invoiceArea" style="background: #fff; color: #000; padding: 20px; direction: rtl; font-family: Arial, sans-serif;">
+    <div style="border: 2px solid #000; border-radius: 10px; padding: 10px; margin-bottom: 20px; font-weight: bold; font-size: 1.3rem;">
+      السادة \ <span id="invoiceCompanyNameDisplay"></span>
+    </div>
+    <div style="text-align:center; font-size:1.6rem; font-weight:800; margin-bottom: 20px; color:#000;">م فاتورة حساب</div>
+    <div id="invoiceTableContainer" style="overflow-x: auto;"></div>
+    <div style="display:flex; flex-direction: column; align-items: flex-start; margin-top: 20px; gap: 15px;">
+      <div style="width: 50%; min-width: 250px;">
+        <table style="width: 100%; border-collapse:collapse; color:#000; border: 2px solid #000; font-size: 1.1rem;">
+          <tbody id="invoiceTotalsHtml"></tbody>
+        </table>
+      </div>
+      <div style="width: 50%; min-width: 250px;">
+        <table style="width: 100%; border-collapse:collapse; color:#000; border: 2px solid #000; font-size: 1.1rem;">
+          <tbody id="invoiceFinalSums"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</section>
+<section class="view" id="view-manual-invoice">
+  <div class="section-header">
+    <div>
+      <h2>فاتورة يدوية</h2>
+      <p id="manualInvoiceCompanyName">الشركة: </p>
+    </div>
+    <div class="quick-actions">
+      <button class="primary-btn" id="printManualInvoiceBtn" style="background:#a61424;"><i class="fa-solid fa-print"></i> طباعة في ورقة واحدة</button>
+      <button class="soft-btn" id="pdfManualInvoiceBtn"><i class="fa-solid fa-file-pdf"></i> تحميل PDF</button>
+      <button class="icon-btn" onclick="document.querySelector('.nav-btn[data-target=\'view-reports\']').click()"><i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+  </div>
+  <section class="glass panel" id="manualInvoiceArea" style="background: #fff; color: #000; padding: 20px;">
+    <div style="text-align:center; font-size:1.4rem; font-weight:800; margin-bottom: 20px; color:#000;">م فاتورة حساب</div>
+    <div style="overflow-x: auto;">
+      <table style="width:100%; border-collapse:collapse; color:#000; text-align:center; border: 2px solid #000; margin-bottom: 20px; font-weight: bold;" dir="rtl">
+        <thead style="background:#eaeaea;">
+          <tr>
+            <th style="border: 1px solid #000; padding:10px;">رقم البوليصه</th>
+            <th style="border: 1px solid #000; padding:10px;">عدد الحاويات</th>
+            <th style="border: 1px solid #000; padding:10px;">حجم الحاويات</th>
+            <th style="border: 1px solid #000; padding:10px;">سعر المفرد</th>
+            <th style="border: 1px solid #000; padding:10px;">مجموع التخليص</th>
+            <th style="border: 1px solid #000; padding:10px;">التاريخ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+            <td style="border: 1px solid #000; padding:8px;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; padding:0; margin:0; outline:none;"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="display:flex; flex-direction: column; align-items: flex-start; margin-top: 20px; gap: 20px;">
+      <div style="width: 50%; min-width: 300px;">
+        <table style="width: 100%; border-collapse:collapse; color:#000;">
+          <tbody>
+            <tr><td style="border: 1px solid #000; padding:8px; text-align:center; font-weight:bold; width: 60%; background:#eaeaea;">الاجور شحن اضافية</td><td style="border: 1px solid #000; padding:8px; text-align:center; width: 40%; font-weight:bold;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; font-weight:bold; padding:0; margin:0; outline:none;"></td></tr>
+            <tr><td style="border: 1px solid #000; padding:8px; text-align:center; font-weight:bold; background:#eaeaea;">أجور عوائد إضافية بسبب التأخير</td><td style="border: 1px solid #000; padding:8px; text-align:center; font-weight:bold;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; font-weight:bold; padding:0; margin:0; outline:none;"></td></tr>
+            <tr><td style="border: 1px solid #000; padding:8px; text-align:center; font-weight:bold; background:#eaeaea;">أجور ساحة خزن بسبب التأخيرية</td><td style="border: 1px solid #000; padding:8px; text-align:center; font-weight:bold;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; font-weight:bold; padding:0; margin:0; outline:none;"></td></tr>
+            <tr><td style="border: 1px solid #000; padding:8px; text-align:center; font-weight:bold; background:#eaeaea;">أجور مطابقات</td><td style="border: 1px solid #000; padding:8px; text-align:center; font-weight:bold;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; font-weight:bold; padding:0; margin:0; outline:none;"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="width: 50%; min-width: 300px;">
+        <table style="width: 100%; border-collapse:collapse; color:#000;">
+          <tbody>
+            <tr><td style="border: 1px solid #000; border-width: 2px 1px 1px 1px; padding:8px; text-align:center; font-weight:bold; background:#eaeaea; width:50%;">مجموع المبلغ</td><td style="border: 1px solid #000; border-width: 2px 1px 1px 1px; padding:8px; text-align:center; font-weight:bold; width:50%;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; font-weight:bold; padding:0; margin:0; outline:none;"></td></tr>
+            <tr><td style="border: 1px solid #000; padding:8px; text-align:center; font-weight:bold; background:#eaeaea;">المبلغ الواصل</td><td style="border: 1px solid #000; padding:8px; text-align:center; font-weight:bold;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; font-weight:bold; padding:0; margin:0; outline:none;"></td></tr>
+            <tr><td style="border: 1px solid #000; border-width: 1px 1px 2px 1px; padding:8px; text-align:center; font-weight:bold; background:#e8d1a1;">المبلغ الباقي</td><td style="border: 1px solid #000; border-width: 1px 1px 2px 1px; padding:8px; text-align:center; font-weight:bold; background:#e8d1a1;"><input type="text" style="width:100%; border:none; background:transparent; text-align:center; color:#000; font-weight:bold; padding:0; margin:0; outline:none;"></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</section>
+  </main>
+  <nav class="bottom-nav glass"><button class="nav-btn active" data-target="view-dashboard"><i class="fa-solid fa-house"></i><span>الرئيسية</span></button><button class="nav-btn" data-target="view-companies"><i class="fa-solid fa-building"></i><span>الشركات</span></button><button class="nav-btn" data-target="view-reports"><i class="fa-solid fa-chart-pie"></i><span>التقارير</span></button><button class="nav-btn" data-target="view-ledger"><i class="fa-solid fa-file-invoice"></i><span>الكشوفات</span></button></nav>
+  <div id="toast" class="toast"></div>
+
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+  import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyBS3stQurZfZ2LMJceLoDiuR948MGkTJ0w",
+    authDomain: "ouioiu-739ff.firebaseapp.com",
+    databaseURL: "https://ouioiu-739ff-default-rtdb.firebaseio.com",
+    projectId: "ouioiu-739ff",
+    storageBucket: "ouioiu-739ff.firebasestorage.app",
+    messagingSenderId: "671798532231",
+    appId: "1:671798532231:web:815c03467de1061f9a0022"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  window.db = getDatabase(app);
+  window.dbRef = ref;
+  window.dbOnValue = onValue;
+  window.dbSet = set;
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script><script type="module" src="script.js"></script>
+</body></html>
